@@ -34,3 +34,11 @@ The Solar System Simulator is a simple application built using Qt that allows us
 3. Enter the desired number of days in the input field and click "Update" to adjust the simulation time.
 4. Use the speed dropdown menu to change the speed of the simulation.
 5. Explore the orbits of celestial bodies by adjusting the zoom slider.
+
+## Screenshots
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="./OutputImages/out1.png" alt="Screenshot 1" width="30%">
+  <img src="./OutputImages/out2.png" alt="Screenshot 2" width="30%">
+  <img src="./OutputImages/out3.png" alt="Screenshot 3" width="30%">
+</div>
