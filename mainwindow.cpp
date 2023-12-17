@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mainwindow.h"
 #include "OpenGLWindow.h"
+#include "SolarSystem.h"
 #include <QPushButton>
 #include <QGridLayout>
 #include <QInputDialog>
@@ -10,7 +11,6 @@ MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
 	setupUi();
-
 	connect(mStartButton, &QPushButton::clicked, this, &MainWindow::startBtn);
 	connect(mStopButton, &QPushButton::clicked, this, &MainWindow::stopBtn);
 	connect(mResetButton, &QPushButton::clicked, this, &MainWindow::resetBtn);
@@ -33,6 +33,15 @@ void MainWindow::setupUi()
 	mSpeedComboBox = new QComboBox(this);
 	mZoomSlider = new QSlider(Qt::Horizontal, mWidget);
 	mRenderer = new OpenGLWindow(QColor(0, 0, 0), mWidget);
+
+	QVector<GLfloat> mVertices;
+	QVector<GLfloat> mColors;
+	//solar = new SolarSystem();
+	//QVector<QVector<GLfloat>> solarData = solar.getData();
+	//solar.drawSolarSystem(mVertices, mColors);
+	//const QVector<GLfloat>& vertices = solarData.at(0);
+	//const QVector<GLfloat>& colors = solarData.at(1);
+	//mRenderer->setData(mVertices, mColors);
 
 	setCentralWidget(mWidget);
 	mStartButton = new QPushButton("Start", mWidget);
@@ -65,9 +74,10 @@ void MainWindow::setupUi()
 
 	mZoomSlider->setRange(0, 100);
 	mZoomSlider->setValue(50);
-	mVbuttonsLayout->addWidget(mZoomSlider);
+
 
 	mVbuttonsLayout->addWidget(mRenderer, 1);
+	mVbuttonsLayout->addWidget(mZoomSlider);
 	mBaseLayout->addLayout(mVbuttonsLayout, 0, 0);
 	setWindowTitle(QCoreApplication::translate("Solar System Simulator", "Solar System Simulator", nullptr));
 }
@@ -111,7 +121,7 @@ void MainWindow::updateBtn()
 
 void MainWindow::onSpeedComboBoxIndexChanged(int index)
 {
-	double speedMultiplier{}; // Default speed
+	double speedMultiplier{1.0}; // Default speed
 
 	switch (index)
 	{
