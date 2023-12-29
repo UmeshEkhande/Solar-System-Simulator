@@ -59,6 +59,7 @@ void SolarSystem::drawOrbitingPlanets(std::vector<GLfloat>& mVertices, std::vect
 		Point3D planetColor = mPlanetColors[i];
 
 		circle->drawColoredCircle(mVertices, mColors, x, y, planetRadius[i], 600, planetColor);
+
 		planetAngles[i] += (*mSpeedMultiplier) * planetSpeed[i];
 
 		// Angle Should be 360 degrees
@@ -66,7 +67,6 @@ void SolarSystem::drawOrbitingPlanets(std::vector<GLfloat>& mVertices, std::vect
 			planetAngles[i] -= 360.0f;
 		}
 	}
-
 }
 
 void SolarSystem::setSpeedMultiplier(double speedMultiplier)

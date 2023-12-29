@@ -13,8 +13,6 @@ public:
 	void drawCircle(std::vector<float>& mVertices, std::vector<float>& mColors, float cx, float cy, float radius, int segments, Point3D circleColor);
 	void drawColoredCircle(std::vector<float>& mVertices, std::vector<float>& mColors, float cx, float cy, float radius, int segments, Point3D circleColor);
 
-
-
 private:
 	std::vector<Point3D> mPoints;
 	float radius;

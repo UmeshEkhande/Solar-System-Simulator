@@ -5,10 +5,10 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <QInputDialog>
-#include <iostream>   
+#include <iostream>
+#include <vector>
 
-MainWindow::MainWindow(QWidget* parent)
-	: QMainWindow(parent)
+MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
 {
 	setupUi();
 	connect(mStartButton, &QPushButton::clicked, this, &MainWindow::startBtn);
@@ -19,8 +19,9 @@ MainWindow::MainWindow(QWidget* parent)
 	connect(mZoomSlider, &QSlider::valueChanged, this, &MainWindow::zoomSliderChanged);
 	connect(mTabWidget, &QTabWidget::currentChanged, this, &MainWindow::onTabChanged);
 	connect(mDrawBezierBtn, &QPushButton::clicked, this, &MainWindow::drawCurveUsingBezier);
-	connect(mHermiteBtn, &QPushButton::clicked, this, &MainWindow::drawCurveUsingBezier);
-	connect(mBSplineBtn, &QPushButton::clicked, this, &MainWindow::drawCurveUsingBezier);
+	connect(mHermiteBtn, &QPushButton::clicked, this, &MainWindow::drawCurveUsingHermite);
+	connect(mBSplineBtn, &QPushButton::clicked, this, &MainWindow::drawCurveUsingBSpline);
+	connect(mClearBtn, &QPushButton::clicked, this, &MainWindow::clearWindow);
 
 }
 
@@ -72,13 +73,10 @@ void MainWindow::setupUi()
 	mDrawBezierBtn = new QPushButton("Draw Bezier", mWidget);
 	mHermiteBtn = new QPushButton("Draw Hermite", mWidget);
 	mBSplineBtn = new QPushButton("Draw BSpline", mWidget);
-
 	mClearBtn = new QPushButton("Clear", mWidget);
 
 	QWidget* solarSystemTab = new QWidget(mTabWidget);
-	QWidget* bezierTab = new QWidget(mTabWidget);
-	QWidget* hermiteTab = new QWidget(mTabWidget);
-	QWidget* bSplineTab = new QWidget(mTabWidget);
+	QWidget* curveTab = new QWidget(mTabWidget);
 
 	mStartButton = new QPushButton("Start", mWidget);
 	mStopButton = new QPushButton("Stop", mWidget);
@@ -88,14 +86,9 @@ void MainWindow::setupUi()
 	mZoomSlider = new QSlider(Qt::Horizontal, mWidget);
 	mRenderer = new OpenGLWindow(QColor(0, 0, 0), mWidget);
 	mBezierRenderer = new OpenGLWindow(QColor(0, 0, 0), mWidget);
-	mHermiteRenderer = new OpenGLWindow(QColor(0, 0, 0), mWidget);
-	mBSpline3DRenderer = new OpenGLWindow(QColor(0, 0, 0), mWidget);
-
 
 	mTabWidget->setFixedSize(900, 720);
 
-
-	/*-------------for remainging tab*/
 	mVTab2ButtonsLayout->addWidget(mDrawBezierBtn);
 	mVTab2ButtonsLayout->addWidget(mHermiteBtn);
 	mVTab2ButtonsLayout->addWidget(mBSplineBtn);
@@ -103,7 +96,6 @@ void MainWindow::setupUi()
 
 	mPoint1->setText("Point1");
 	mVPoint1Layout->addWidget(mPoint1, 0, Qt::AlignHCenter);
-	//mX1Input->setB
 	mX1Input->setPlaceholderText("Enter X Coordinate");
 	mVPoint1Layout->addWidget(mX1Input);
 	mY1Input->setPlaceholderText("Enter Y Coordinate");
@@ -121,7 +113,6 @@ void MainWindow::setupUi()
 	mZ2Input->setPlaceholderText("Enter Z Coordinate");
 	mVPoint2Layout->addWidget(mZ2Input);
 
-
 	mPoint3->setText("Point3");
 	mVPoint3Layout->addWidget(mPoint3, 0, Qt::AlignHCenter);
 	mX3Input->setPlaceholderText("Enter X Coordinate");
@@ -130,8 +121,6 @@ void MainWindow::setupUi()
 	mVPoint3Layout->addWidget(mY3Input);
 	mZ3Input->setPlaceholderText("Enter Z Coordinate");
 	mVPoint3Layout->addWidget(mZ3Input);
-
-
 
 	mPoint4->setText("Point4");
 	mVPoint4Layout->addWidget(mPoint4, 0, Qt::AlignHCenter);
@@ -142,49 +131,30 @@ void MainWindow::setupUi()
 	mZ4Input->setPlaceholderText("Enter Z Coordinate");
 	mVPoint4Layout->addWidget(mZ4Input);
 
-
-
 	mInputButtonsLayout->addLayout(mVTab2ButtonsLayout);
 	mInputButtonsLayout->addLayout(mVPoint1Layout);
 	mInputButtonsLayout->addLayout(mVPoint2Layout);
 	mInputButtonsLayout->addLayout(mVPoint3Layout);
 	mInputButtonsLayout->addLayout(mVPoint4Layout);
-
 	mInputButtonsLayout->setAlignment(Qt::AlignTop);
 
-	// Set up Solar System tab
 	QVBoxLayout* solarSystemLayout = new QVBoxLayout();
 	solarSystemLayout->addLayout(mButtonsLayout);
 	solarSystemLayout->addWidget(mRenderer, 1);
 	solarSystemLayout->addWidget(mZoomSlider);
 	solarSystemTab->setLayout(solarSystemLayout);
 
-	QVBoxLayout* bezierLayout = new QVBoxLayout();
-	bezierLayout->addLayout(mInputButtonsLayout);
-	bezierLayout->addWidget(mBezierRenderer,1);
-	bezierTab->setLayout(bezierLayout);
+	QVBoxLayout* curveLayout = new QVBoxLayout();
+	curveLayout->addLayout(mInputButtonsLayout);
+	curveLayout->addWidget(mBezierRenderer,1);
+	curveTab->setLayout(curveLayout);
+;
 
-	QVBoxLayout* hermiteLayout = new QVBoxLayout();	
-    hermiteLayout->addWidget(mHermiteRenderer);
-	hermiteTab->setLayout(hermiteLayout);
-
-	QVBoxLayout* bSplineLayout = new QVBoxLayout();
-	bSplineLayout->addWidget(mBSpline3DRenderer);
-	bSplineTab->setLayout(bSplineLayout);
-
-	// Add tabs to the QTabWidget
 	mTabWidget->addTab(solarSystemTab, "Solar System Simulator");
-	mTabWidget->addTab(bezierTab, "Bezier");
-	mTabWidget->addTab(hermiteTab, "Hermite");
-	mTabWidget->addTab(bSplineTab, "bSpline");
+	mTabWidget->addTab(curveTab, "Curve");
 
-	//mTabWidget->setFixedSize(720, 700);
-
-	QVector<GLfloat> mVertices;
-	QVector<GLfloat> mColors;
 
 	setCentralWidget(mWidget);
-
 	mTimeInput = new QLineEdit(mWidget);
 	mTimeInput->setPlaceholderText("Enter days");
 
@@ -208,9 +178,6 @@ void MainWindow::setupUi()
 	mSpeedComboBox->setCurrentIndex(1);
 	mButtonsLayout->addWidget(mSpeedComboBox);
 
-
-	
-
 	mZoomSlider->setRange(0, 100);
 	mZoomSlider->setValue(50);
 
@@ -218,7 +185,6 @@ void MainWindow::setupUi()
 	mBaseLayout->addLayout(mVbuttonsLayout, 0, 0);
 
 	onTabChanged(mTabWidget->currentIndex());  
-
 	setWindowTitle(QCoreApplication::translate("Solar System Simulator", "Solar System Simulator", nullptr));
 
 }
@@ -226,8 +192,61 @@ void MainWindow::setupUi()
 void MainWindow::drawCurveUsingBezier()
 {
 	mVertices.clear();
+	mVerticess.clear();
 	mColors.clear();
+	mColorss.clear();
 
+	xCoordinate = mX1Input->text().toFloat();
+	yCoordinate = mY1Input->text().toFloat();
+	zCoordinate = mZ1Input->text().toFloat();
+
+	x1Coordinate = mX2Input->text().toFloat();
+	y1Coordinate = mY2Input->text().toFloat();
+	z1Coordinate = mZ2Input->text().toFloat();
+
+	x2Coordinate = mX3Input->text().toFloat();
+	y2Coordinate = mY3Input->text().toFloat();
+	z2Coordinate = mZ3Input->text().toFloat();
+
+	x3Coordinate = mX4Input->text().toFloat();
+	y3Coordinate = mY4Input->text().toFloat();
+	z3Coordinate = mZ4Input->text().toFloat();
+
+	Point3D p0 = Point3D(xCoordinate, yCoordinate, zCoordinate);
+	Point3D p1 = Point3D(x1Coordinate, y1Coordinate, z1Coordinate);
+	Point3D p2 = Point3D(x2Coordinate, y2Coordinate, z2Coordinate);
+	Point3D p3 = Point3D(x3Coordinate, y3Coordinate, z3Coordinate);
+
+	ver << xCoordinate << yCoordinate << zCoordinate;
+	col << 0.0f << 1.0f << 0.0f;
+
+	Bezier bezier(p0, p1, p2, p3);
+	bezier.drawCurve(p0, p1, p2, p3, mVerticess, mColorss);
+
+	for (int i = 0; i < mVerticess.size(); i += 3)
+	{
+		ver << mVerticess[i] << mVerticess[i + 1] << mVerticess[i + 2];
+	}
+	for (int i = 0; i < mColorss.size(); i += 3)
+	{
+		col << mColorss[i] << mColorss[i + 1] << mColorss[i + 2];
+	}
+
+	ver << x3Coordinate << y3Coordinate << z3Coordinate;
+	col << 0.0f << 1.0f << 0.0f;
+
+	mBezierRenderer->updateData(ver, col,1);
+
+	ver.clear();
+	col.clear();
+	mVertices.clear();
+	mColors.clear();
+}
+
+void MainWindow::drawCurveUsingHermite()
+{
+	mVertices.clear();
+	mColors.clear();
 
 	xCoordinate = mX1Input->text().toFloat();
 	yCoordinate = mY1Input->text().toFloat();
@@ -254,23 +273,67 @@ void MainWindow::drawCurveUsingBezier()
 	mVertices.push_back(yCoordinate);
 	mVertices.push_back(zCoordinate);
 
-	/*mVertices << xCoordinate << yCoordinate << zCoordinate;*/
-
 	mColors.push_back(0.0f);
 	mColors.push_back(1.0f);
 	mColors.push_back(0.0f);
 
-	//mColors << 0.0f << 1.0f << 0.0f;
-
-	Bezier bezier(p0, p1, p2, p3);
-	bezier.drawCurve(p0, p1, p2, p3, mVertices, mColors);
+	 Hermite hermite(p0,p1,p2,p3);
+	 hermite.drawCurve(p0, p1, p2, p3, mVertices, mColors);
 
 	mVertices.push_back(x3Coordinate);
 	mVertices.push_back(y3Coordinate);
 	mVertices.push_back(z3Coordinate);
 
-	//mVertices << x3Coordinate << y3Coordinate << z3Coordinate;
+	mColors.push_back(0.0f);
+	mColors.push_back(1.0f);
+	mColors.push_back(0.0f);
 
+	mBezierRenderer->updateData(mVertices, mColors);
+	mVertices.clear();
+	mColors.clear();
+
+}
+
+void MainWindow::drawCurveUsingBSpline()
+{
+	mVertices.clear();
+	mColors.clear();
+
+	xCoordinate = mX1Input->text().toFloat();
+	yCoordinate = mY1Input->text().toFloat();
+	zCoordinate = mZ1Input->text().toFloat();
+
+	x1Coordinate = mX2Input->text().toFloat();
+	y1Coordinate = mY2Input->text().toFloat();
+	z1Coordinate = mZ2Input->text().toFloat();
+
+	x2Coordinate = mX3Input->text().toFloat();
+	y2Coordinate = mY3Input->text().toFloat();
+	z2Coordinate = mZ3Input->text().toFloat();
+
+	x3Coordinate = mX4Input->text().toFloat();
+	y3Coordinate = mY4Input->text().toFloat();
+	z3Coordinate = mZ4Input->text().toFloat();
+
+	Point3D p0 = Point3D(xCoordinate, yCoordinate, zCoordinate);
+	Point3D p1 = Point3D(x1Coordinate, y1Coordinate, z1Coordinate);
+	Point3D p2 = Point3D(x2Coordinate, y2Coordinate, z2Coordinate);
+	Point3D p3 = Point3D(x3Coordinate, y3Coordinate, z3Coordinate);
+
+	mVertices.push_back(xCoordinate);
+	mVertices.push_back(yCoordinate);
+	mVertices.push_back(zCoordinate);
+
+	mColors.push_back(0.0f);
+	mColors.push_back(1.0f);
+	mColors.push_back(0.0f);
+
+	BSpline3D BSpline3D(p0, p1, p2, p3);
+	BSpline3D.drawCurveBspline(mVertices, mColors);
+
+	mVertices.push_back(x3Coordinate);
+	mVertices.push_back(y3Coordinate);
+	mVertices.push_back(z3Coordinate);
 
 	mColors.push_back(0.0f);
 	mColors.push_back(1.0f);
@@ -281,29 +344,32 @@ void MainWindow::drawCurveUsingBezier()
 	mColors.clear();
 }
 
+void MainWindow::clearWindow()
+{
+	mVertices.clear();
+	mColors.clear();
+	mBezierRenderer->updateData(mVertices, mColors);
+}
+
 void MainWindow::onTabChanged(int tabIndex)
 {
-	// Show/hide the QSlider based on the selected tab
-	if (tabIndex == 0)  // Solar System Simulator tab
+	if (tabIndex == 0)  
 	{
 		mRenderer->startRendering();
 		mZoomSlider->show();
 	}
-	else if (tabIndex == 1)
+	else
 	{
 		mRenderer->stopRendering();
 		mRenderer->resetPositions();
 	}
-	else
-	{
 
-	}
 }
 
 
 void MainWindow::zoomSliderChanged(int value)
 {
-	double zoomFactor = 0.5 + (value / 100.0) * 1.5;
+	GLfloat zoomFactor = 0.5 + (value / 100.0) * 1.0;
 	mRenderer->setZoomFactor(zoomFactor);
 }
 
@@ -339,7 +405,7 @@ void MainWindow::updateBtn()
 
 void MainWindow::onSpeedComboBoxIndexChanged(int index)
 {
-	double speedMultiplier{1.0}; // Default speed
+	double speedMultiplier{1.0}; 
 
 	switch (index)
 	{
