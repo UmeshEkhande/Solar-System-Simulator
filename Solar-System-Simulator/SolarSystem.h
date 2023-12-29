@@ -31,8 +31,10 @@ private:
 	float planetAngles[numPlanets] = { 0.0f };
 
 	std::vector<Point3D> mPlanetColors;
+
 	std::vector<float> mCurrentVertices;
 	std::vector<float> mCurrentColors;
+
 
 	SolarSystem* solar;
 	Circle* circle;

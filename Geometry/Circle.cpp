@@ -58,3 +58,4 @@ void Circle::drawColoredCircle(std::vector<float>& mVertices, std::vector<float>
 		mColors.push_back(circleColor.z());
 	}
 }
+

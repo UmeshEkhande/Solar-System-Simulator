@@ -7,9 +7,11 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QTimer>
-#include <QComboBox>  // Include QComboBox
+#include <QComboBox>  
 #include "SolarSystem.h"
 #include "Bezier.h"
+#include "Hermite.h"
+#include "BSpline3D.h"
 
 class OpenGLWindow;
 
@@ -24,6 +26,9 @@ public:
 private:
     void setupUi();
     void drawCurveUsingBezier();
+    void drawCurveUsingHermite();
+    void drawCurveUsingBSpline();
+    void clearWindow();
 
 private slots:
     void startBtn();
@@ -41,11 +46,13 @@ private:
     QVBoxLayout* mVerticalLayout;
     QGraphicsView* mGraphicsView;
     QHBoxLayout* mHorizontalLayout;
+
     QPushButton* mStartButton;
     QPushButton* mStopButton;
     QPushButton* mResetButton;
     QPushButton* mUpdateButton;
     QLineEdit* mTimeInput;
+
     QTimer* mTimer;
     QWidget* mWidget;
     QMenuBar* mMainMenuBar;
@@ -90,10 +97,7 @@ private:
     QLineEdit* mY4Input;
     QLineEdit* mZ4Input;
 
-
-
     SolarSystem* solar;
-
     QTabWidget* mTabWidget;
     QWidget* mBezier;
 
@@ -115,32 +119,12 @@ private:
     float y3Coordinate;
     float z3Coordinate;
 
-    QLineEdit* mLineEdit;
-    QLineEdit* mLineEdit2;
-    QLineEdit* mLineEdit3;
-    QLineEdit* mLineEdit4;
-    QLineEdit* mLineEdit5;
-    QLineEdit* mLineEdit6;
-    QLineEdit* mLineEdit7;
-    QLineEdit* mLineEdit8;
-    QLineEdit* mLineEdit9;
-    QLineEdit* mLineEdit10;
-    QLineEdit* mLineEdit11;
-    QLineEdit* mLineEdit12;
-
-    QLineEdit* mLineEdit13;
-    QLineEdit* mLineEdit14;
-    QLineEdit* mLineEdit15;
-    QLineEdit* mLineEdit16;
-    QLineEdit* mLineEdit17;
-    QLineEdit* mLineEdit18;
-    QLineEdit* mLineEdit19;
-    QLineEdit* mLineEdit20;
-    QLineEdit* mLineEdit21;
-    QLineEdit* mLineEdit22;
-    QLineEdit* mLineEdit23;
-    QLineEdit* mLineEdit24;
-
     std::vector<float> mVertices;
     std::vector<float> mColors;
+
+    vector<float>mVerticess;
+    vector<float>mColorss;
+
+    QVector<GLfloat> ver;
+    QVector<GLfloat> col;
 };

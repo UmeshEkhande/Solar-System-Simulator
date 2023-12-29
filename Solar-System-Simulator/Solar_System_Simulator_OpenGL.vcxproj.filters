@@ -63,4 +63,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="vShader.glsl" />
+    <None Include="fShader.glsl" />
+  </ItemGroup>
 </Project>
